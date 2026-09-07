@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시스템 해킹됨</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #ff0000;
+            font-family: 'Malgun Gothic', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            cursor: pointer; /* 클릭 가능 표시 */
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .container {
+            text-align: center;
+            border: 2px solid #ff0000;
+            padding: 40px;
+            background: rgba(20, 0, 0, 0.9);
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.6);
+            display: none; /* 처음엔 숨김 */
+        }
+
+        .container.active {
+            display: block;
+            animation: shake 0.5s infinite;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin: 0;
+            text-shadow: 0 0 10px #ff0000;
+        }
+
+        .error-code {
+            font-size: 1.5rem;
+            margin-top: 20px;
+            color: #fff;
+            background: #ff0000;
+            padding: 5px 15px;
+            display: inline-block;
+        }
+
+        .start-btn {
+            font-size: 2rem;
+            color: #fff;
+            background: #ff0000;
+            padding: 20px 40px;
+            border: none;
+            cursor: pointer;
+            animation: pulse 1s infinite;
+            font-weight: bold;
+        }
+
+        .loading-bar {
+            width: 200px;
+            height: 10px;
+            background: #333;
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: #ff0000;
+            animation: load 3s ease-in-out forwards;
+        }
+
+        @keyframes load {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        #hint {
+            position: absolute;
+            top: 10%;
+            font-size: 1.2rem;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="hint">⚠️ 화면을 클릭하여 해킹 확인 ⚠️</div>
+
+    <div id="start-screen">
+        <button class="start-btn" id="start-btn">클릭하여 확인</button>
+    </div>
+
+    <div class="container" id="hack-container">
+        <h1>시스템 해킹됨</h1>
+        <div class="error-code">에러 코드: 832</div>
+        
+        <div style="margin-top: 20px; font-size: 1.2rem;">
+            > 당신의 핸드폰은 해킹되었습니다.<br>
+            > 데이터 탈취 중... 99%<br>
+            > 위치 추적 완료
+        </div>
+
+        <div class="loading-bar"></div>
+        <p style="color: #fff;">전원 끄지 마시오</p>
+    </div>
+
+    <!-- 소리 파일 (외부 링크) -->
+    <audio id="alarm-sound" loop>
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const startBtn = document.getElementById('start-btn');
+        const startScreen = document.getElementById('start-screen');
+        const hackContainer = document.getElementById('hack-container');
+        const audio = document.getElementById('alarm-sound');
+        const hint = document.getElementById('hint');
+
+        startBtn.addEventListener('click', function() {
+            // 1. 소리 재생
+            audio.play().catch(e => console.log("Audio error"));
+
+            // 2. 화면 전환
+            startScreen.style.display = 'none';
+            hackContainer.classList.add('active');
+            hint.style.display = 'none';
+
+            // 3. 전체 화면 모드
+            document.documentElement.requestFullscreen().catch(err => {});
+        });
+    </script>
+</body>
+</html>
