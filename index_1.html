@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gold Fortune Casino</title>
+    <style>
+        /* 기본 스타일 - 고급스러운 다크 테마 */
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 상단 광고판 (움직이는 배너) */
+        .ad-banner {
+            width: 100%;
+            background-color: #ffcc00;
+            color: #000;
+            padding: 15px 0;
+            overflow: hidden;
+            white-space: nowrap;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .ad-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: scrollLeft 10s linear infinite;
+        }
+
+        @keyframes scrollLeft {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* 룰렛 컨테이너 */
+        .roulette-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin-top: 50px;
+            border-radius: 50%;
+            border: 10px solid #ffd700;
+            box-shadow: 0 0 20px #ffd700, inset 0 0 20px #ffd700;
+            overflow: hidden;
+        }
+
+        /* 바늘 */
+        .arrow {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 25px solid red;
+            z-index: 5;
+            filter: drop-shadow(0 0 5px black);
+        }
+
+        /* 바퀴本身 */
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1); /* 부드러운 감속 효과 */
+        }
+
+        /* 룰렛 바퀴 조각들 */
+        .segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            left: 0;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-sizing: border-box;
+        }
+
+        /* 텍스트 위치 조정 (바퀴 중심에서 멀리 떨어뜨리기) */
+        .segment span {
+            position: absolute;
+            left: 50%;
+            top: 15%;
+            transform: translateX(-50%);
+            text-shadow: 1px 1px 2px black;
+        }
+
+        /* 버튼 스타일 */
+        .spin-btn {
+            margin-top: 40px;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+            transition: transform 0.1s;
+        }
+
+        .spin-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 결과 및 해킹 화면 */
+        #result-area {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading-bar-container {
+            width: 200px;
+            height: 20px;
+            background: #333;
+            border: 1px solid #555;
+            margin: 10px auto;
+            position: relative;
+        }
+
+        .loading-bar {
+            height: 100%;
+            width: 0%;
+            background: #00ff00;
+            transition: width 0.1s linear;
+        }
+
+        .ip-text {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* 해킹 경고창 스타일 (무섭게) */
+        #hack-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(200, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .hack-text {
+            font-size: 2rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 2px 2px 0px black;
+            text-align: center;
+            animation: blink 0.5s infinite alternate;
+        }
+
+        @keyframes blink {
+            from { opacity: 1; }
+            to { opacity: 0.5; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 상단 광고 -->
+    <div class="ad-banner">
+        <div class="ad-text">
+            🎉 오늘만 특별 혜택! 가입하고 100달러 받기 🎉 &nbsp;&nbsp;&nbsp; 💰 당첨 확률 UP! 지금 바로 도전하세요! 💰
+        </div>
+    </div>
+
+    <!-- 룰렛 영역 -->
+    <div class="roulette-container">
+        <div class="arrow"></div>
+        <div class="wheel" id="wheel">
+            <!-- 자바스크립트로 바퀴 조각들이 채워짐 -->
+        </div>
+    </div>
+
+    <!-- 버튼 -->
+    <button class="spin-btn" id="spinBtn" onclick="spin()">룰렛 돌리기</button>
+
+    <!-- 결과 및 해킹 진행 영역 -->
+    <div id="result-area">
+        <h2>당첨 금액: 4200$</h2>
+        <p>자금 인출 준비 중...</p>
+        
+        <div class="loading-bar-container">
+            <div class="loading-bar" id="loadingBar"></div>
+        </div>
+        <p id="ip-display" class="ip-text">IP 주소 확보 중: 310.78.2.61</p>
+    </div>
+
+    <!-- 해킹 오버레이 -->
+    <div id="hack-overlay">
+        <div class="hack-text">
+            당신의 핸드폰은 문제가 생겼습니다.<br>
+            <span style="font-size: 1rem; color: yellow;">SYSTEM ERROR: HACK IN PROGRESS</span>
+        </div>
+    </div>
+
+    <script>
+        // 룰렛 데이터 (원하는 순서대로 배치)
+        // 4200$가 반드시 나오도록 위치와 각도를 계산해야 함
+        // 8개 조각으로 나눔. 360 / 8 = 45도 간격
+        const segments = [
+            { amount: "", color: "#2c3e50", target: false },
+            { amount: "", color: "#34495e", target: false },
+            { amount: "", color: "#2c3e50", target: false },
+            { amount: "", color: "#34495e", target: false },
+            { amount: "", color: "#f1c40f", textColor: "#000", target: true }, // 이걸로 맞춰야 함
+            { amount: "", color: "#2c3e50", target: false },
+            { amount: "", color: "#34495e", target: false },
+            { amount: "", color: "#2c3e50", target: false }
+        ];
+
+        const wheel = document.getElementById('wheel');
+        const spinBtn = document.getElementById('spinBtn');
+        let currentRotation = 0;
+
+        // 바퀴 생성
+        segments.forEach((seg, index) => {
+            const div = document.createElement('div');
+            div.className = 'segment';
+            div.style.background = seg.color;
+            // 회전: 45도 * 인덱스
+            div.style.transform = `rotate(deg) skewY(-45deg)`;
+            
+            const textSpan = document.createElement('span');
+            textSpan.innerText = seg.amount;
+            textSpan.style.color = seg.textColor || 'white';
+            // 텍스트 회전 보정 (skewY 때문에 더 보정 필요)
+            textSpan.style.transform = `translateX(-50%) skewY(45deg) rotate(deg)`;
+            
+            div.appendChild(textSpan);
+            wheel.appendChild(div);
+        });
+
+        function spin() {
+            spinBtn.disabled = true;
+            spinBtn.style.display = 'none';
+
+            // 목표: 4200$가 위쪽(0도 위치, 화살표 위치)에 오게 함.
+            // 4200$는 인덱스 4번.
+            // 4200$의 중심은 4 * 45 + 22.5 = 202.5도 위치에서 시작.
+            // 이를 0도로 맞추려면: -202.5도 회전.
+            // 여기에 전체 회전 수(360 * 5 = 1800도)를 더함.
+            // 무작위 오차(최소 한 조각만큼의 오차)를 줘서 자연스럽게 보이게 함.
+            
+            const targetIndex = 4; // 4200$
+            const segmentAngle = 45;
+            // 바퀴가 멈춰야 할 각도 계산 (위쪽을 향하게)
+            // 인덱스 0이 0도라고 가정하면, 인덱스 4는 180도(또는 202.5도 기준선)에 있음.
+            // CSS rotate는 시계방향. 
+            // 4200$를 0도(화살표 위치)에 가져오려면:
+            // rotation = (360 * 5) + (360 - (index * 45 + 22.5))
+            // + 랜덤 오차
+            const randomOffset = Math.floor(Math.random() * 30) - 15; // -15도 ~ +15도
+            const extraSpins = 5 * 360; 
+            const targetAngle = 360 - (targetIndex * segmentAngle + 22.5); 
+            
+            const newRotation = currentRotation + extraSpins + targetAngle + randomOffset - (currentRotation % 360);
+            
+            wheel.style.transform = `rotate(deg)`;
+            currentRotation = newRotation;
+
+            // 애니메이션 끝나기 1초 후 결과 처리
+            setTimeout(() => {
+                showResult();
+            }, 4000);
+        }
+
+        function showResult() {
+            document.getElementById('result-area').style.display = 'block';
+            
+            let width = 0;
+            const bar = document.getElementById('loadingBar');
+            const ipDisplay = document.getElementById('ip-display');
+
+            // 1%부터 100%까지 빠르게 차오르는 로직
+            const interval = setInterval(() => {
+                width += 1; // 빠르게 채움
+                bar.style.width = width + '%';
+                bar.style.background = width < 50 ? '#00ff00' : (width < 80 ? '#ffff00' : '#ff0000');
+
+                if (width === 80) {
+                    ipDisplay.style.display = 'block';
+                    ipDisplay.innerText = "IP 주소 확보: 310.78.2.61";
+                }
+
+                if (width >= 100) {
+                    clearInterval(interval);
+                    triggerHack();
+                }
+            }, 15); // 15ms마다 1% 증가 -> 약 1.5초 소요
+        }
+
+        function triggerHack() {
+            const overlay = document.getElementById('hack-overlay');
+            overlay.style.display = 'flex';
+            
+            // 진동 효과 (모바일)
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200, 100, 500]);
+            }
+
+            // 경고음 생성 (Buzzer)
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    const ctx = new AudioContext();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.value = 150; // 낮은 주파수
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    
+                    // 소리 작게 만들기
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    
+                    // 1초 후 정지
+                    setTimeout(() => {
+                        osc.stop();
+                    }, 1000);
+                }
+            } catch (e) {
+                console.log("Audio error");
+            }
+        }
+    </script>
+</body>
+</html>
